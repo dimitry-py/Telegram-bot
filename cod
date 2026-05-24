@@ -1,0 +1,76 @@
+!pip install pytelegrambotAPI
+import random
+
+def gen_pass(pass_length):
+    elements = "+-/*!&$#?=@<>1234567890zxcvbnmasdfghjklqwertyuiopQWERTYUIOPASDFGHJKLZXCVBNM"
+    password = ""
+    for i in range(int(pass_length)):
+        password += random.choice(elements)
+    return password
+import random
+def flip_coin():
+    flip = random.randint(0, 2)
+    if flip == 0:
+        return "ОРЕЛ"
+    else:
+        return "РЕШКА"
+import telebot
+import os, random
+
+# Замени 'TOKEN' на токен твоего бота
+# Этот токен ты получаешь от BotFather, чтобы бот мог работать
+bot = telebot.TeleBot("8245612304:AAFPq9ctJ_DGUyvqXZWc3IaL43gl0t_mVD8")
+
+img = os.listdir('images')
+img.pop(0)
+
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    print(message)
+    bot.reply_to(message, "Привет! Я твой Telegram бот. Напиши что-нибудь!")
+    bot.reply_to(message, "Список команд:")
+    bot.reply_to(message, "/hello - приветствие")
+    bot.reply_to(message, "/bye - прощание")
+    bot.reply_to(message, "/password - сгенерирует пароль")
+    bot.reply_to(message, "/coin - подбросить монетку")
+    bot.reply_to(message, "/heh - пишет 'he' 5 раз")
+    bot.reply_to(message, "/heh (Любое число) - пишет 'he' столько раз сколько раз вы написали")
+    bot.reply_to(message, "/mem - отправит случайный мем")
+@bot.message_handler(commands=['hello'])
+def send_hello(message):
+    bot.reply_to(message, "Привет! Как дела?")
+
+@bot.message_handler(commands=['bye'])
+def send_bye(message):
+    bot.reply_to(message, "Пока! Удачи!")
+
+@bot.message_handler(commands=['password'])
+def send_pass(message):
+  try:
+    # Attempt to get the length from the message, default to 10 if not provided or invalid
+    pass_length = int(message.text.split()[1])
+  except (IndexError, ValueError):
+    pass_length = 10 # Default length
+  bot.reply_to(message, gen_pass(pass_length))
+
+@bot.message_handler(commands=['coin'])
+def send_coin(message):
+  bot.reply_to(message, flip_coin())
+
+# Обработчик команды '/heh'
+@bot.message_handler(commands=['heh'])
+def send_heh(message):
+    count_heh = int(message.text.split()[1]) if len(message.text.split()) > 1 else 5
+    bot.reply_to(message, "he" * count_heh)
+
+@bot.message_handler(commands=['mem'])
+def send_mem(message):
+    file  = random.choice(img)
+    with open(f'/content/images/{file}', 'rb') as f:
+        bot.send_photo(message.chat.id, f)
+
+@bot.message_handler(func=lambda message: True)
+def echo_message(message):
+    bot.reply_to(message, message.text)
+
+bot.polling()
